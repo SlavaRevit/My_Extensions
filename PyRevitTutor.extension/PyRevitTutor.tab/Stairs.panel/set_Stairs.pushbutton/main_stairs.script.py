@@ -21,49 +21,72 @@ runs_collector = FilteredElementCollector(doc). \
     WhereElementIsNotElementType(). \
     ToElements()
 
+
+def IsRailingAssociatedWithRun(railing_element, runs_element):
+    # Get the bounding boxes of the railing and the run
+    railing_bb = railing_element.get_BoundingBox(None)
+    run_bb = runs_element.get_BoundingBox(None)
+    # Extract the min and max points of the outlines
+    railing_min = railing_bb.Min
+    railing_max = railing_bb.Max
+    run_min = run_bb.Min
+    run_max = run_bb.Max
+
+    # Check if the outlines intersect by comparing the min and max points
+    if (railing_min.X <= run_max.X and railing_max.X >= run_min.X and
+        railing_min.Y <= run_max.Y and railing_max.Y >= run_min.Y and
+        railing_min.Z <= run_max.Z and railing_max.Z >= run_min.Z):
+        return True
+    else:
+        return False
+
 transaction = Transaction(doc, 'Set coating marble values')
 transaction.Start()
 for el in stairs_collector:
+    #get runs
     associated_railings = el.GetAssociatedRailings()
     runs = el.GetStairsRuns()
+
+    #getting parameters from stairs
     coatingMarble_param = el.LookupParameter("CoatingMarble")
     LineForBlindPeople_param = el.LookupParameter("LineForBlindPeople")
     PanelStairs_param = el.LookupParameter("PanelStairs")
     actualNumberOfRises = el.LookupParameter("Actual Number of Risers").AsInteger()
 
-    #setting Coating marble
-    act_Result = 0.0
-    lengthPanel = 0
-    count_runs = 0
+    #initial variables
+    coatingMarbleResult = 0.0
     blindLineLength = 0 
+    lengthPanel = 0
+    r_depth = 0
+    r_height = 0
+    count = 0 
     for r in runs:
-        count_runs += 2
         runs_element = doc.GetElement(r)
+
+        #getting run_width
         runs_width = runs_element.ActualRunWidth * 0.3048
+        #params of rises and treads
         runs_actualNumberOfRises = runs_element.LookupParameter("Actual Number of Risers").AsInteger()
-        riser_width = // need to get this param
-        riser_height = // need to get this param (how it called in Revit)
-        lengthPanel = ((riser_width + riser_height) * runs_actualNumberOfRises)  
-        act_Result += (runs_width * runs_actualNumberOfRises)
-        blindLineLength += (runs_width * count_runs) * 2
-
-    
-    coatingMarble_param.Set(act_Result / 30.48)
-    
-    #setting Panel stairs
-    count = 0
-    for railing in associated_railings:
-        railing_element = doc.GetElement(railing)
-        if "Home" or "Stairway" in railing_element.Name:
-            count += 1
-            print(railing_element.Name)
-    PanelStairs_param.Set(lengthPanel * count)
-    
-
-     
+        runs_actualNumberOfTreads = runs_element.LookupParameter("Actual Number of Treads").AsInteger()
+        #marble for run 
+        coatingMarbleResult += (runs_width * runs_actualNumberOfRises)
+        #getting run params
+        r_depth = runs_element.LookupParameter("Actual Tread Depth").AsDouble() * 0.3048
+        r_height = runs_element.LookupParameter("Actual Riser Height").AsDouble() * 0.3048
+        # blinde line for run
+        blindLineLength += (runs_width * 2)
+        
+        #checking if reiling that we need exist, and if so we calculating lengthPanel for this run
+        for railing in associated_railings:    
+            railing_element = doc.GetElement(railing)
+            if "on Wall" in railing_element.Name and IsRailingAssociatedWithRun(railing_element, runs_element):
+                lengthPanel += (r_depth * runs_actualNumberOfTreads) + (r_height * runs_actualNumberOfRises)
+                count += 1
 
 
-
+    coatingMarble_param.Set(coatingMarbleResult / 0.3048)
+    PanelStairs_param.Set((lengthPanel) / 0.3048)
+    LineForBlindPeople_param.Set((blindLineLength) / 0.3048)
 
 
 transaction.Commit()
