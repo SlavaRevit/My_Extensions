@@ -36,6 +36,7 @@ def IsRailingAssociatedWithRun(railing_element, runs_element):
     if (railing_min.X <= run_max.X and railing_max.X >= run_min.X and
         railing_min.Y <= run_max.Y and railing_max.Y >= run_min.Y and
         railing_min.Z <= run_max.Z and railing_max.Z >= run_min.Z):
+
         return True
     else:
         return False
