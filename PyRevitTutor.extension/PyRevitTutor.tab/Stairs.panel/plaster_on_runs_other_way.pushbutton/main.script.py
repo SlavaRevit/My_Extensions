@@ -80,7 +80,8 @@ def getting_parameters_for_runs(el):
 
 def sort_key(vertex):
     return vertex.Position.X, vertex.Position.Y, vertex.Position.Z
-
+def sort_item(item):
+    return item[0], item[1], item[2]
 
 t = Transaction(doc, "plaster on runs")
 t.Start()
@@ -168,10 +169,10 @@ for el in stairs_collector:
             print(ex)
 
         # sorted_start = sorted(coordinates_start)
-        sorted_start = sorted(coordinates_start, key=lambda vertex: (vertex[0], vertex[1], vertex[2]))
-        # for x,nn in enumerate(sorted_start):
-        #     print("The position is: ",x, round(nn,14))
-        # sorted_end = sorted(coordinates_end, key=lambda vertex: (vertex[0], vertex[1], vertex[2]))
+        new_list = [(round(item[2][0], 10), item[2][1], item[2][2]) for item in coordinates_start]
+        new_sorted_list = sorted(new_list, key=sort_item)
+        for x in new_sorted_list:
+            print(x)
 
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         try:
@@ -194,7 +195,7 @@ for el in stairs_collector:
 
             for i, vertex in enumerate(sorted_vertex_array):
                 x, y, z = vertex.Position.X, vertex.Position.Y, vertex.Position.Z
-                x_new, y_new, z_new = sorted_start[i]
+                x_new, y_new, z_new = new_sorted_list[i]
                 # pos_check = (x, y, z)
                 # if (vertex.Position.X, vertex.Position.Y) == (x_new, y_new):
                 #     print("Position is:",i, z_new)

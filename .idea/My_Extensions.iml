@@ -5,7 +5,7 @@
       <sourceFolder url="file://$MODULE_DIR$/PyRevitTutor.extension/PyRevitTutor.tab/Stairs.panel" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/PyRevitTutor.extension/lib" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.8" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.9" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">
